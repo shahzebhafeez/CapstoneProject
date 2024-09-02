@@ -94,7 +94,7 @@ def main():
         summary = summarizer_output[0]['summary_text']
         
         st.subheader("Translate Summary to Urdu:")
-        translater = pipeline('translation', model='Helsinki-NLP/opus-mt-en-ur')
+        translater = pipeline('translation_en_to_ur', model='Helsinki-NLP/opus-mt-en-ur')
         translated_text = translater(summary)[0]['translation_text']
 
         bullet_points = translated_text.split('-')
