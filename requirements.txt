@@ -1,0 +1,11 @@
+sacremoses==0.0.53
+datasets
+transformers
+torch
+torchvision
+torchaudio
+streamlit
+PyPDF2
+langdetect
+wordcloud
+matplotlib
