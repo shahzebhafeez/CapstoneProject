@@ -45,13 +45,6 @@ def main():
                           min_length=min_len, 
                           max_length=max_len)
 
-    # Initialize session state
-    if 'summary' not in st.session_state:
-        st.session_state.summary = ""
-
-    if 'translated_summary' not in st.session_state:
-        st.session_state.translated_summary = ""
-
     # Main content layout
     input_text = ""
     col1, col2 = st.columns(2)
@@ -78,47 +71,37 @@ def main():
         if st.button('Summarize'):
             if input_text:
                 output = summarizer(input_text)
-                st.session_state.summary = output[0]['summary_text']
-                st.success(f'Summary Word Count: {len(st.session_state.summary.split(" "))}')
+                summary = output[0]['summary_text']
+                st.success(f'Summary Word Count: {len(summary.split(" "))}')
                 st.subheader("Summary:")
 
-                # Split summary into bullet points
-                bullet_points = st.session_state.summary.split('. ')
+                bullet_points = summary.split('. ')
                 for point in bullet_points:
                     st.markdown(f"• **{point}**")
 
                 # Display a word cloud of the summary
                 st.subheader("Word Cloud of the Summary:")
-                create_wordcloud(st.session_state.summary)
+                create_wordcloud(summary)
 
                 # Option to save the summary
-                st.download_button("Download Summary", st.session_state.summary, file_name="summary.txt", key="summary_download")
+                st.download_button("Download Summary", summary, file_name="summary.txt")
 
     st.markdown("---")  # Section divider
 
-    # Translation section
-    if st.session_state.summary and st.button('Translate to Urdu'):
-        translater = pipeline('translation_en_to_ur', model='Helsinki-NLP/opus-mt-en-ur')
-        st.session_state.translated_summary = translater(st.session_state.summary)[0]['translation_text']
-
+    # Translation section after summarization
+    if input_text and st.button('Translate to Urdu'):
+        summarizer_output = summarizer(input_text)
+        summary = summarizer_output[0]['summary_text']
+        
         st.subheader("Translate Summary to Urdu:")
-        bullet_points = st.session_state.translated_summary.split('-')  # Split on Urdu sentence delimiter
-        for point in bullet_points:
-            if point.strip():
-                st.markdown(f"• **{point.strip()}**")
+        translater = pipeline('translation_en_to_ur', model='Helsinki-NLP/opus-mt-en-ur')
+        translated_text = translater(summary)[0]['translation_text']
 
-        st.download_button('Download Translated Summary', st.session_state.translated_summary, file_name='summary_urdu.txt', key='translated_summary_download')
-
-    # Display the summaries if they exist
-    if st.session_state.summary:
-        st.subheader("Summary:")
-        bullet_points = st.session_state.summary.split('. ')
+        bullet_points = translated_text.split('-')
         for point in bullet_points:
             st.markdown(f"• **{point}**")
 
-        st.download_button("Download Summary", st.session_state.summary, file_name="summary.txt", key="summary_download_repeated")
-
-   
+        st.download_button('Download Translated Summary', translated_text, file_name='summary_urdu.txt')
 
 if __name__ == '__main__':
     main()
